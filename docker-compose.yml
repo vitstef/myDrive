@@ -21,7 +21,7 @@ services:
       - 'mongodb_data_volume:/data/db'
 volumes:
       mongodb_data_volume:
-        external: false
+        external: true
 networks:
   mydrive:
     driver: bridge
