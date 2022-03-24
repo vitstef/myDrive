@@ -18,7 +18,7 @@ jobs:
          PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       run: |
           echo -n "$GPG_PRIVATE_KEY" | base64 --decode | gpg --import --no-tty --batch --yes
-          gpg --quiet --batch --yes --always-trust --decrypt --passphrase=$env:PASSPHRASE --output docker-variables.env docker-variables.env.gpg
+          gpg --quiet --batch --yes --decrypt --pinentry-mode loopback --passphrase=$env:PASSPHRASE --output docker-variables.env docker-variables.env.gpg
     - name: Create volume for Mongo
       run: docker volume create --name=mongodb_data_volume
     - name: Build the Docker image
