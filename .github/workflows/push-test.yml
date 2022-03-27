@@ -17,6 +17,7 @@ jobs:
       uses: hashicorp/ghaction-import-gpg@v2.1.0
       env:
         GPG_PRIVATE_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+        PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
     - run: |
           gpg -v --quiet --yes --decrypt --passphrase=${{ secrets.GPG_PASSPHRASE }} --output docker-variables.env docker-variables.env.gpg
     - name: Create volume for Mongo
