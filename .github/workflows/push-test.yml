@@ -12,11 +12,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Import GPG Key
-      run: |
-          set -x
-          cat <(echo -e "${{ secrets.GPG_SIGNING_KEY }}") | gpg --import --no-tty --batch --yes
-          gpg --list-secret-keys --keyid-format LONG
+    - name: Import GPG key
+        id: import_gpg
+        uses: hashicorp/ghaction-import-gpg@v2.1.0
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      - run: |
           gpg -v --quiet --yes --decrypt --passphrase=${{ secrets.GPG_PASSPHRASE }} --output docker-variables.env docker-variables.env.gpg
     - name: Create volume for Mongo
       run: docker volume create --name=mongodb_data_volume
