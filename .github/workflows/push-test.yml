@@ -22,5 +22,9 @@ jobs:
           gpg -v --quiet --yes --decrypt --passphrase=${{ secrets.GPG_PASSPHRASE }} --output docker-variables.env docker-variables.env.gpg
     - name: Create volume for Mongo
       run: docker volume create --name=mongodb_data_volume
-    - name: Build the Docker image
-      run: docker-compose build
+    - name: Build the Docker image and push to registry
+      run: | 
+          docker-compose build
+          echo ${{ secrets.PAT }} | docker login ghcr.io --username vitstef --password-stdin
+          docker tag mydrive_app ghcr.io/vitstef/mydrive_app:latest
+          docker push ghcr.io/vitstef/mydrive_app:latest
