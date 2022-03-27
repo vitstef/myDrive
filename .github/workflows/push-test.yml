@@ -22,5 +22,3 @@ jobs:
       run: docker volume create --name=mongodb_data_volume
     - name: Build the Docker image
       run: docker-compose build
-    - name: Container run
-      run: docker-compose up -d
