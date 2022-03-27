@@ -15,7 +15,7 @@ jobs:
     - name: Import GPG Key
       run: |
           set -x
-          cat <(echo -e "${{ secrets.GPG_SIGNING_KEY }}") | gpg --batch --import
+          cat <(echo -e "${{ secrets.GPG_SIGNING_KEY }}") | base64 --decode | gpg --import --no-tty --batch --yes
           gpg --list-secret-keys --keyid-format LONG
           gpg -v --quiet --yes --decrypt --passphrase=${{ secrets.GPG_PASSPHRASE }} --output docker-variables.env docker-variables.env.gpg
     - name: Create volume for Mongo
