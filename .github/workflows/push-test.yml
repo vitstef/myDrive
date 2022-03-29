@@ -39,8 +39,7 @@ jobs:
           docker-compose build
           echo ${{ secrets.PAT }} | docker login ghcr.io --username vitstef --password-stdin
           docker tag mydrive_app ghcr.io/vitstef/mydrive_app:latest
-          docker tag mydrive_app gcr.io/just-student-344815/mydrive-app:latest
-          #docker push ghcr.io/vitstef/mydrive_app:latest
+          docker push ghcr.io/vitstef/mydrive_app:latest
 
     - name: Google Auth
       id: auth
