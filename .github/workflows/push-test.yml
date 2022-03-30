@@ -71,7 +71,7 @@ jobs:
       id: deploy
       uses: google-github-actions/deploy-cloudrun@v0
       with:
-        service: ${{ env.SERVICE }}
+        service: 'mydrive-app'
         region: ${{ env.REGION }}
         # NOTE: If using a pre-built image, update the image name here
         image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/mydrive-app:latest
