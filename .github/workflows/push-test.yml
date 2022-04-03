@@ -36,7 +36,7 @@ jobs:
 #      run: docker volume create --name=mongodb_data_volume
     - name: Build the Docker image and push to registry
       run: | 
-          docker build .
+          docker build -t mydrive_app:latest .
           echo ${{ secrets.PAT }} | docker login ghcr.io --username vitstef --password-stdin
           docker tag mydrive_app ghcr.io/vitstef/mydrive_app:latest
           docker push ghcr.io/vitstef/mydrive_app:latest
