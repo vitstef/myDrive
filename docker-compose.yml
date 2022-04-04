@@ -22,3 +22,6 @@ services:
 volumes:
       mongodb_data_volume:
         external: true
+networks:
+  mydrive:
+    driver: bridge
