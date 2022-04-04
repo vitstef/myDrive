@@ -2,7 +2,7 @@ name: myDrive Docker CI
 
 on:
   push:
-    branches: [ mydrive-GCloudRun ]
+    branches: [ master ]
     
 env:
   PROJECT_ID: 'just-student-344815'
