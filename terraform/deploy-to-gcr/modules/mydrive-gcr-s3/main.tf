@@ -1,24 +1,6 @@
-terraform {
-  required_providers {
-    google = {
-      source = "hashicorp/google"
-      version = "~> 4.16.0"
-      }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.0"
-    }
-  }
-}
-
 # AWS S3 Bucket Creation
-provider "aws" {
-  region = "us-east-1"
-  shared_credentials_files = ["mycreds-aws"]
-}
-
 resource "aws_s3_bucket" "mydrive-vitstef" {
-  bucket = "mydrive-vitstef"
+  bucket = "${var.env}-mydrive-vitstef"
   force_destroy = "true"
 }
 
@@ -40,24 +22,18 @@ resource "aws_s3_account_public_access_block" "mydrive-vitstef" {
   restrict_public_buckets = true
 }
 
-# Google Part
-
-provider "google" {
-  credentials = file ("mycreds-gcp.json")
-  project = "just-student-344815"
-}
-
+# Google Part[var.env]
 // Cloud Run deploy
 resource "google_cloud_run_service" "mydrive" {
-  name     = "mydrive-terraform"
+  name     = "${var.env}-mydrive-terraform"
   location = "us-central1"
   template {
     spec {
       containers {
-        image = "us-central1-docker.pkg.dev/just-student-344815/github-docker-repo/mydrive-app:latest"
-	env {
+        image = "${var.image-repo}:${local.image-tag}"
+	      env {
          name = "MONGODB_URL"
-         value = var.mongodb-url
+         value = "${var.mongodb-ip}/${var.env}-mydrive-db"
          }
         env {
           name = "KEY"
@@ -90,8 +66,8 @@ resource "google_cloud_run_service" "mydrive" {
         env {
           name = "HTTP_PORT"
           value = "3000"
-	  }
-	env {
+	        }
+	      env {
           name = "DISABLE_EMAIL_VERIFICATION"
           value = "true"
           }
@@ -109,7 +85,7 @@ resource "google_cloud_run_service" "mydrive" {
           }
         env {
           name = "S3_BUCKET"
-          value = "mydrive-vitstef"
+          value = "${var.env}-mydrive-vitstef"
           }
         env {
           name = "S3_ID"
@@ -183,7 +159,7 @@ resource "google_cloud_run_service_iam_policy" "noauth" {
 
 // Network endpoint group creation
 resource "google_compute_region_network_endpoint_group" "mydrive" {
-  name                  = "mydrive-terraform"
+  name                  = "${var.env}-mydrive-terraform"
   network_endpoint_type = "SERVERLESS"
   region                = "us-central1"
   cloud_run {
@@ -192,16 +168,9 @@ resource "google_compute_region_network_endpoint_group" "mydrive" {
 }
 
 // Load Balancer creation
-// SSL Certificate import
-resource "google_compute_ssl_certificate" "mydrive-lb" {
-  name_prefix = "letsencrypt-"
-  description = "vitstef-ga"
-  private_key = file("/etc/letsencrypt/live/vitstef.ga/privkey.pem")
-  certificate = file("/etc/letsencrypt/live/vitstef.ga/fullchain.pem")
-
-  lifecycle {
-    create_before_destroy = true
-  }
+// Get SSL Certificate data
+data "google_compute_ssl_certificate" "mydrive-lb" {
+  name = "letsencrypt-vitstef-ga"
 }
 
 // LB Backend
@@ -230,7 +199,7 @@ resource "google_compute_backend_service" "mydrive-lb-backend" {
     sample_rate = "0"
   }
 
-  name             = "mydrive-lb-backend"
+  name             = "${var.env}-mydrive-lb-backend"
   port_name        = "http"
   project          = "just-student-344815"
   protocol         = "HTTPS"
@@ -240,75 +209,72 @@ resource "google_compute_backend_service" "mydrive-lb-backend" {
 
 resource "google_compute_url_map" "mydrive-lb" {
   default_service = google_compute_backend_service.mydrive-lb-backend.id
-  name            = "mydrive-lb"
+  name            = "${var.env}-mydrive-lb"
   project         = "just-student-344815"
 }
 
 
 // LB http-proxy
-resource "google_compute_target_http_proxy" "mydrive-lb-target-proxy" {
-  name       = "mydrive-lb-target-proxy"
+resource "google_compute_target_http_proxy" "mydrive-lb-target-proxy-http" {
+  name       = "${var.env}-mydrive-lb-target-proxy"
   project    = "just-student-344815"
   proxy_bind = "false"
   url_map    = google_compute_url_map.mydrive-lb.id
 }
 
 // LB https-proxy
-resource "google_compute_target_https_proxy" "mydrive-lb-target-proxy-2" {
-  name             = "mydrive-lb-target-proxy-2"
+resource "google_compute_target_https_proxy" "mydrive-lb-target-proxy-https" {
+  name             = "${var.env}-mydrive-lb-target-proxy-https"
   project          = "just-student-344815"
   proxy_bind       = "false"
   quic_override    = "NONE"
-  ssl_certificates = [google_compute_ssl_certificate.mydrive-lb.id]
+  ssl_certificates = [data.google_compute_ssl_certificate.mydrive-lb.id]
   url_map          = google_compute_url_map.mydrive-lb.id
 }
 
 // LB Frontend
-resource "google_compute_global_forwarding_rule" "mydrive-lb-forwarding-rule" {
+resource "google_compute_global_forwarding_rule" "mydrive-lb-forwarding-rule-http" {
   ip_protocol           = "TCP"
   ip_version            = "IPV4"
   load_balancing_scheme = "EXTERNAL"
-  name                  = "mydrive-lb-forwarding-rule"
+  name                  = "${var.env}-mydrive-lb-forwarding-rule-http"
   port_range            = "80-80"
   project               = "just-student-344815"
-  target                = google_compute_target_http_proxy.mydrive-lb-target-proxy.id
+  target                = google_compute_target_http_proxy.mydrive-lb-target-proxy-http.id
 }
 
-resource "google_compute_global_forwarding_rule" "mydrive-lb-forwarding-rule-2" {
+resource "google_compute_global_forwarding_rule" "mydrive-lb-forwarding-rule-https" {
   ip_protocol           = "TCP"
   ip_version            = "IPV4"
   load_balancing_scheme = "EXTERNAL"
-  name                  = "mydrive-lb-forwarding-rule-2"
+  name                  = "${var.env}-mydrive-lb-forwarding-rule-https"
   port_range            = "443-443"
   project               = "just-student-344815"
-  target                = google_compute_target_https_proxy.mydrive-lb-target-proxy-2.id
+  target                = google_compute_target_https_proxy.mydrive-lb-target-proxy-https.id
 }
 
-// DNS
-resource "google_dns_managed_zone" "vitstef-ga" {
-  description   = "Managed by Terraform"
-  dns_name      = "vitstef.ga."
-  force_destroy = "true"
-  name          = "vitstef-ga"
+// DNS data
+
+data "google_dns_managed_zone" "vitstef-ga" {
+  name = "vitstef-ga"
   project       = "just-student-344815"
-  visibility    = "public"
 }
 
 // DNS records
 resource "google_dns_record_set" "http-vitstef-ga-A" {
-  managed_zone = google_dns_managed_zone.vitstef-ga.name
-  name         = "http.${google_dns_managed_zone.vitstef-ga.dns_name}"
+  managed_zone = data.google_dns_managed_zone.vitstef-ga.name
+  name         = "http${local.subdomain}.${data.google_dns_managed_zone.vitstef-ga.dns_name}"
   project      = "just-student-344815"
-  rrdatas      = [google_compute_global_forwarding_rule.mydrive-lb-forwarding-rule.ip_address]
+  rrdatas      = [google_compute_global_forwarding_rule.mydrive-lb-forwarding-rule-http.ip_address]
   ttl          = "300"
   type         = "A"
 }
 
 resource "google_dns_record_set" "mydrive-vitstef-ga-A" {
-  managed_zone = google_dns_managed_zone.vitstef-ga.name
-  name         = "mydrive.${google_dns_managed_zone.vitstef-ga.dns_name}"
+  managed_zone = data.google_dns_managed_zone.vitstef-ga.name
+  name         = "mydrive${local.subdomain}.${data.google_dns_managed_zone.vitstef-ga.dns_name}"
   project      = "just-student-344815"
-  rrdatas      = [google_compute_global_forwarding_rule.mydrive-lb-forwarding-rule-2.ip_address]
+  rrdatas      = [google_compute_global_forwarding_rule.mydrive-lb-forwarding-rule-https.ip_address]
   ttl          = "300"
   type         = "A"
 }
