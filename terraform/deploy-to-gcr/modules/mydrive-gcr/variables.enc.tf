@@ -1,0 +1,21 @@
+{
+	"data": "ENC[AES256_GCM,data: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,iv:EkjZ9eOfE+u+GsqhPPp+Jy8WE2FnyjhwR4EDc++9lmQ=,tag:oNijV0zOWFWouhwisvEMWA==,type:str]",
+	"sops": {
+		"kms": null,
+		"gcp_kms": [
+			{
+				"resource_id": "projects/just-student-344815/locations/global/keyRings/sops/cryptoKeys/sops-key",
+				"created_at": "2022-04-20T20:28:39Z",
+				"enc": "CiQA3d7Sl8Pnneib8PopQ3cAltQOIu6QBoflwwlR3+85t0JexjYSSQDGi2IHyM38Db4yqded2AEqBO/7al/9IjD9dNETtZNgGhp8aQOCBOY+Z6a4dDFaXyYoI8S/KogUeAkO/IvSQpOjP48TgD2Gf8Y="
+			}
+		],
+		"azure_kv": null,
+		"hc_vault": null,
+		"age": null,
+		"lastmodified": "2022-04-20T20:28:39Z",
+		"mac": "ENC[AES256_GCM,data:6xnLYUEVHMYKNWb3tqgrr1P1LK/1Qr9lGhztZ8R/zV8CAgbzNkLZjc4mvyyfDyEVuN8WoedBJQfgEmU2c5TA/chmE7Jxv3wYaSxpoYwMvVh57Ac7F9aAeuEuh6gjEdN2ijBveIk0Nf+Kxx8zZCjxn3363Yzxhh3Uz1n+7Kb2SeY=,iv:b3YdmMEZ4vAPehDmwwM7em/pNrD11Pj/GwODU4GIhA8=,tag:M2HrnX2Pwrk6rCWVqJdWOQ==,type:str]",
+		"pgp": null,
+		"unencrypted_suffix": "_unencrypted",
+		"version": "3.7.2"
+	}
+}

@@ -1,11 +1,11 @@
 # AWS S3 Bucket Creation
-resource "aws_s3_bucket" "mydrive-vitstef" {
-  bucket = "${var.env}-mydrive-vitstef"
+resource "aws_s3_bucket" "s3_bucket" {
+  bucket = "${var.env}-mydrive"
   force_destroy = "true"
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "mydrive-vitstef" {
-  bucket = aws_s3_bucket.mydrive-vitstef.bucket
+resource "aws_s3_bucket_server_side_encryption_configuration" "s3_bucket_server_side_encryption_configuration" {
+  bucket = aws_s3_bucket.s3_bucket.bucket
 
   rule {
     bucket_key_enabled = false
@@ -15,7 +15,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "mydrive-vitstef" 
   }
 }
 
-resource "aws_s3_account_public_access_block" "mydrive-vitstef" {
+resource "aws_s3_account_public_access_block" "s3_account_public_access_block" {
   block_public_acls   = true
   block_public_policy = true
   ignore_public_acls      = true
@@ -24,9 +24,9 @@ resource "aws_s3_account_public_access_block" "mydrive-vitstef" {
 
 # Google Part[var.env]
 // Cloud Run deploy
-resource "google_cloud_run_service" "mydrive" {
+resource "google_cloud_run_service" "this" {
   name     = "${var.env}-mydrive-terraform"
-  location = "us-central1"
+  location = var.gcr-service-location
   template {
     spec {
       containers {
@@ -85,7 +85,7 @@ resource "google_cloud_run_service" "mydrive" {
           }
         env {
           name = "S3_BUCKET"
-          value = "${var.env}-mydrive-vitstef"
+          value = "${var.env}-mydrive"
           }
         env {
           name = "S3_ID"
@@ -113,7 +113,7 @@ resource "google_cloud_run_service" "mydrive" {
       "autoscaling.knative.dev/minScale" = "2"
       "autoscaling.knative.dev/maxScale" = "2"
       "run.googleapis.com/client-name"   = "cloud-console"
-      "run.googleapis.com/vpc-access-connector" = "projects/just-student-344815/locations/us-central1/connectors/mydrive-app-to-mongo-vm"
+      "run.googleapis.com/vpc-access-connector" = var.vpc-access-connector
       "run.googleapis.com/vpc-access-egress"    = "private-ranges-only"
     }
   } 
@@ -150,37 +150,37 @@ data "google_iam_policy" "noauth" {
 }
 
 resource "google_cloud_run_service_iam_policy" "noauth" {
-  location    = google_cloud_run_service.mydrive.location
-  project     = google_cloud_run_service.mydrive.project
-  service     = google_cloud_run_service.mydrive.name
+  location    = google_cloud_run_service.this.location
+  project     = google_cloud_run_service.this.project
+  service     = google_cloud_run_service.this.name
 
   policy_data = data.google_iam_policy.noauth.policy_data
 }
 
 // Network endpoint group creation
-resource "google_compute_region_network_endpoint_group" "mydrive" {
+resource "google_compute_region_network_endpoint_group" "this" {
   name                  = "${var.env}-mydrive-terraform"
   network_endpoint_type = "SERVERLESS"
-  region                = "us-central1"
+  region                = var.gcr-network-endpoint-group-region
   cloud_run {
-    service = google_cloud_run_service.mydrive.name
+    service = google_cloud_run_service.this.name
   }
 }
 
 // Load Balancer creation
 // Get SSL Certificate data
-data "google_compute_ssl_certificate" "mydrive-lb" {
+data "google_compute_ssl_certificate" "this" {
   name = "letsencrypt-vitstef-ga"
 }
 
 // LB Backend
-resource "google_compute_backend_service" "mydrive-lb-backend" {
+resource "google_compute_backend_service" "this" {
   affinity_cookie_ttl_sec = "0"
 
   backend {
     balancing_mode               = "UTILIZATION"
     capacity_scaler              = "0"
-    group                        = google_compute_region_network_endpoint_group.mydrive.id
+    group                        = google_compute_region_network_endpoint_group.this.id
     max_connections              = "0"
     max_connections_per_endpoint = "0"
     max_connections_per_instance = "0"
@@ -201,81 +201,80 @@ resource "google_compute_backend_service" "mydrive-lb-backend" {
 
   name             = "${var.env}-mydrive-lb-backend"
   port_name        = "http"
-  project          = "just-student-344815"
+  project          = var.google-project
   protocol         = "HTTPS"
   session_affinity = "NONE"
   timeout_sec      = "30"
 }
 
-resource "google_compute_url_map" "mydrive-lb" {
-  default_service = google_compute_backend_service.mydrive-lb-backend.id
+resource "google_compute_url_map" "this" {
+  default_service = google_compute_backend_service.this.id
   name            = "${var.env}-mydrive-lb"
-  project         = "just-student-344815"
+  project         = var.google-project
 }
 
 
 // LB http-proxy
-resource "google_compute_target_http_proxy" "mydrive-lb-target-proxy-http" {
-  name       = "${var.env}-mydrive-lb-target-proxy"
-  project    = "just-student-344815"
+resource "google_compute_target_http_proxy" "http" {
+  name       = "${var.env}-mydrive-lb-http-proxy"
+  project    = var.google-project
   proxy_bind = "false"
-  url_map    = google_compute_url_map.mydrive-lb.id
+  url_map    = google_compute_url_map.this.id
 }
 
 // LB https-proxy
-resource "google_compute_target_https_proxy" "mydrive-lb-target-proxy-https" {
-  name             = "${var.env}-mydrive-lb-target-proxy-https"
-  project          = "just-student-344815"
+resource "google_compute_target_https_proxy" "https" {
+  name             = "${var.env}-mydrive-lb-https-proxy"
+  project          = var.google-project
   proxy_bind       = "false"
   quic_override    = "NONE"
-  ssl_certificates = [data.google_compute_ssl_certificate.mydrive-lb.id]
-  url_map          = google_compute_url_map.mydrive-lb.id
+  ssl_certificates = [data.google_compute_ssl_certificate.this.id]
+  url_map          = google_compute_url_map.this.id
 }
 
 // LB Frontend
-resource "google_compute_global_forwarding_rule" "mydrive-lb-forwarding-rule-http" {
+resource "google_compute_global_forwarding_rule" "http" {
   ip_protocol           = "TCP"
   ip_version            = "IPV4"
   load_balancing_scheme = "EXTERNAL"
   name                  = "${var.env}-mydrive-lb-forwarding-rule-http"
   port_range            = "80-80"
-  project               = "just-student-344815"
-  target                = google_compute_target_http_proxy.mydrive-lb-target-proxy-http.id
+  project               = var.google-project
+  target                = google_compute_target_http_proxy.http.id
 }
 
-resource "google_compute_global_forwarding_rule" "mydrive-lb-forwarding-rule-https" {
+resource "google_compute_global_forwarding_rule" "https" {
   ip_protocol           = "TCP"
   ip_version            = "IPV4"
   load_balancing_scheme = "EXTERNAL"
   name                  = "${var.env}-mydrive-lb-forwarding-rule-https"
   port_range            = "443-443"
-  project               = "just-student-344815"
-  target                = google_compute_target_https_proxy.mydrive-lb-target-proxy-https.id
+  project               = var.google-project
+  target                = google_compute_target_https_proxy.https.id
 }
 
 // DNS data
 
-data "google_dns_managed_zone" "vitstef-ga" {
+data "google_dns_managed_zone" "this" {
   name = "vitstef-ga"
-  project       = "just-student-344815"
+  project       = var.google-project
 }
 
 // DNS records
-resource "google_dns_record_set" "http-vitstef-ga-A" {
-  managed_zone = data.google_dns_managed_zone.vitstef-ga.name
-  name         = "http${local.subdomain}.${data.google_dns_managed_zone.vitstef-ga.dns_name}"
-  project      = "just-student-344815"
-  rrdatas      = [google_compute_global_forwarding_rule.mydrive-lb-forwarding-rule-http.ip_address]
+resource "google_dns_record_set" "http-A" {
+  managed_zone = data.google_dns_managed_zone.this.name
+  name         = "http${local.subdomain}.${data.google_dns_managed_zone.this.dns_name}"
+  project      = var.google-project
+  rrdatas      = [google_compute_global_forwarding_rule.http.ip_address]
   ttl          = "300"
   type         = "A"
 }
 
-resource "google_dns_record_set" "mydrive-vitstef-ga-A" {
-  managed_zone = data.google_dns_managed_zone.vitstef-ga.name
-  name         = "mydrive${local.subdomain}.${data.google_dns_managed_zone.vitstef-ga.dns_name}"
-  project      = "just-student-344815"
-  rrdatas      = [google_compute_global_forwarding_rule.mydrive-lb-forwarding-rule-https.ip_address]
+resource "google_dns_record_set" "https-A" {
+  managed_zone = data.google_dns_managed_zone.this.name
+  name         = "mydrive${local.subdomain}.${data.google_dns_managed_zone.this.dns_name}"
+  project      = var.google-project
+  rrdatas      = [google_compute_global_forwarding_rule.https.ip_address]
   ttl          = "300"
   type         = "A"
 }
-
