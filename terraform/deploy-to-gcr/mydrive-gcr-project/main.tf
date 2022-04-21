@@ -22,17 +22,7 @@ provider "google" {
   region = "us-central1"
 }
 
-module "mydrive-prod" {
+module "mydrive" {
   source = "../modules/mydrive-gcr"
 }
 
-module "mydrive-dev" {
-  source = "../modules/mydrive-gcr"
-  env = "dev"
-#  key = "0987654321"
-#  password = "0987654321"
-#  password-access = "0987654321"
-#  password-refresh = "0987654321"
-#  password-cookie = "0987654321"
-
-}
