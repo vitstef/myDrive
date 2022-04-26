@@ -1,0 +1,30 @@
+{
+	"mongodb-ip": "ENC[AES256_GCM,data:Ep939Kl7eZzHCiPVhs6nlAP3oCn5+HaKaD4=,iv:ZpPo382rfdTuAd8OjW0ASssNsZbXjwR7FHAJcfUlmh4=,tag:0SHaNXKgyxMi4i+fd2P4yA==,type:str]",
+	"s3-id": "ENC[AES256_GCM,data:KCnNdkdYzNYHmr4pntFztTuh1zk=,iv:OpMPJRRP3KOAePKzOPbww8MIWFxXTMB/GI0Fmx66QmQ=,tag:W7jrnrLJ5Khs5dwQpGRICw==,type:str]",
+	"s3-key": "ENC[AES256_GCM,data:Jnbm5wBYio2fU0Coo7oL+g02SminAZQpj1E92R4wPdt5dDe2dK5uKA==,iv:giW3f+ND1f4L7yXGjyAkKYJGMQ4bmvsiHpEdnBBLggk=,tag:WErgoO69/9etLowftIwoSQ==,type:str]",
+	"image-repo": "ENC[AES256_GCM,data:RLkMAweYqcndZfqulddlA3Surk3ti/aSx2PjI3lkQ7+CGtKIoEfgwEWp6aac4jlAp5PW8AHpi0s4w9XZlKnhyKjXuGc3pBKkyFaAiz8=,iv:o0o35jFjcDlLdT6suNnhHCDFxas1wzP4/NS/ThNFgHI=,tag:OwEjsa/kmzg+8Q3YaWR/8Q==,type:str]",
+	"gcr-service-location": "ENC[AES256_GCM,data:Wct2mWtDn8tGm/s=,iv:afYLxoRQ1QlIV32FJ0t6jV10BIqEK3Id7pSDOPku6FU=,tag:foc7IV7fa4GpljGKG6Zagw==,type:str]",
+	"vpc-access-connector": "ENC[AES256_GCM,data:VnBOadLL8d+q43AO07yNVVhnzCZ/WSRGP7GDFxlOXlQSJlUWRw5el8O5Pb4kQHmR1Z/RcZ51/nuxeATB1BRCRz9fRH6MZyToCm3nHfjKAWr62xpNgg==,iv:4mS3Gisq2GhLzeTLH5gQmeTGCs4mRMV1ggI2pAtYDaw=,tag:zHBCMrIdjZIRcn4LE+hHnw==,type:str]",
+	"gcr-network-endpoint-group-region": "ENC[AES256_GCM,data:sB2eibuwR5TlYCs=,iv:9a7x3Y+hTn8CSyfKv/zvioJnua5eSqxUrTIA9wT5LGA=,tag:5ddH8mUS26Ru/5iMKPMtQA==,type:str]",
+	"google-project": "ENC[AES256_GCM,data:Qt0RbdV2hR0c0GnXvb0X95wG3w==,iv:z69p8qIj8s3FBx7+2xDpUKd5cCtBCm9lbF2Aq1MD0jw=,tag:y3YKcV1BrTiECR8/5f4Kdg==,type:str]",
+	"google-region": "ENC[AES256_GCM,data:nnLSd4Cv2GGG4oY=,iv:wvdJbTV05Q5oKqZelRQMA7iCZBNEpYEL5L7Nk0yEo3w=,tag:lZBCYrfilduG3kfQGgMMSQ==,type:str]",
+	"aws-region": "ENC[AES256_GCM,data:f5Y1rxoERucJ,iv:gNNd++VGWpXXpROyxH61busdxizkerCU/pDP3lUQdJw=,tag:IqgjCjZIrqQ2gIEZbvWlOQ==,type:str]",
+	"sops": {
+		"kms": null,
+		"gcp_kms": [
+			{
+				"resource_id": "projects/just-student-344815/locations/global/keyRings/sops/cryptoKeys/sops-key",
+				"created_at": "2022-04-26T23:36:30Z",
+				"enc": "CiQA3d7Sl3UA1pn62SG7cw6gX0yDGSOGAXHWumBWF2+dYWAloDsSSQDGi2IHE9nDgs3vuoz7ubgYW1w2pwUprCFAvHiKhaxaw3H9gCwJmD6mwbnObb14wok1vUdmvCE7+EoRnjoIcXoadaSNQ/B6y0o="
+			}
+		],
+		"azure_kv": null,
+		"hc_vault": null,
+		"age": null,
+		"lastmodified": "2022-04-26T23:36:30Z",
+		"mac": "ENC[AES256_GCM,data:R2c1UBw8N41sKbIQhUiF42ClEwHotqN6V4eQnwexp1TyMJMkJtK+JO/WpEeLAZkEJQpGahK7R19Eu7dDj3oDqY4NiZoDXmRQqV3CsKu4ASXxxLCrKhFoS1rLPXFmpxx8S3MXd/cpqJwgSta09EGdu8Qy/l27ZBCtDmJ2oc3Xaao=,iv:Vbw98KUYFfAVstkxJR9IWs4SYU95szMNI863ZAuBUj0=,tag:8kTxzJ/LVU3SdyzwjHPP8g==,type:str]",
+		"pgp": null,
+		"unencrypted_suffix": "_unencrypted",
+		"version": "3.7.2"
+	}
+}
