@@ -101,10 +101,10 @@ resource "google_cloud_run_service" "this" {
       }
       resources {
             limits   = {
-                cpu    = "2000m"
-                memory = "1Gi"
+                cpu    = var.limits[var.limit-switch[var.vm-size]].cpu
+                memory = var.limits[var.limit-switch[var.vm-size]].memory
       		}
-      	   }      
+     	   }      
       }
  
     }
@@ -119,7 +119,6 @@ resource "google_cloud_run_service" "this" {
   } 
   }
   
-
   metadata {
     annotations = {
       generated-by = "magic-modules"
@@ -213,7 +212,7 @@ resource "google_compute_url_map" "this" {
   project         = var.google-project
 }
 
-
+/*
 // LB http-proxy
 resource "google_compute_target_http_proxy" "http" {
   name       = "${var.env}-mydrive-lb-http-proxy"
@@ -221,7 +220,7 @@ resource "google_compute_target_http_proxy" "http" {
   proxy_bind = "false"
   url_map    = google_compute_url_map.this.id
 }
-
+*/
 // LB https-proxy
 resource "google_compute_target_https_proxy" "https" {
   name             = "${var.env}-mydrive-lb-https-proxy"
@@ -233,6 +232,7 @@ resource "google_compute_target_https_proxy" "https" {
 }
 
 // LB Frontend
+/*
 resource "google_compute_global_forwarding_rule" "http" {
   ip_protocol           = "TCP"
   ip_version            = "IPV4"
@@ -242,7 +242,7 @@ resource "google_compute_global_forwarding_rule" "http" {
   project               = var.google-project
   target                = google_compute_target_http_proxy.http.id
 }
-
+*/
 resource "google_compute_global_forwarding_rule" "https" {
   ip_protocol           = "TCP"
   ip_version            = "IPV4"
@@ -261,6 +261,7 @@ data "google_dns_managed_zone" "this" {
 }
 
 // DNS records
+/*
 resource "google_dns_record_set" "http-A" {
   managed_zone = data.google_dns_managed_zone.this.name
   name         = "http${local.subdomain}.${data.google_dns_managed_zone.this.dns_name}"
@@ -269,7 +270,7 @@ resource "google_dns_record_set" "http-A" {
   ttl          = "300"
   type         = "A"
 }
-
+*/
 resource "google_dns_record_set" "https-A" {
   managed_zone = data.google_dns_managed_zone.this.name
   name         = "mydrive${local.subdomain}.${data.google_dns_managed_zone.this.dns_name}"

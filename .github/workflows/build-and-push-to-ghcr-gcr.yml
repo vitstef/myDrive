@@ -2,15 +2,18 @@ name: myDrive Docker CI
 
 on:
   push:
-    branches-ignore:
-      - master
+    branches:
+      - qa
+      - training
+      - prod
+      
     
 env:
   PROJECT_ID: 'just-student-344815'
   GAR_LOCATION: 'us-central1'
   SERVICE: 'github-docker-repo'
   REGION: 'us-central1'
-  TAG: 'dev'
+  TAG: "$GITHUB_REF_NAME"
 
 jobs:
 
